@@ -1,0 +1,9 @@
+# Ignore sensitive n8n data
+n8n_data/
+.n8n/
+.env
+.env.*
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db

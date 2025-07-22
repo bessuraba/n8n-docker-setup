@@ -1,0 +1,45 @@
+{
+  "name": "n8n-docker-setup",
+  "version": "1.0.0",
+  "description": "Ready-to-deploy Docker setup for n8n workflow automation tool",
+  "main": "index.js",
+  "scripts": {
+    "start": "docker-compose up -d",
+    "stop": "docker-compose down",
+    "restart": "docker-compose restart",
+    "logs": "docker-compose logs -f",
+    "status": "docker-compose ps",
+    "clean": "docker-compose down -v && docker system prune -f",
+    "build": "docker-compose build",
+    "deploy": "npm run build && npm run start",
+    "dev": "docker-compose up",
+    "setup": "cp env.example .env && echo 'Please edit .env file with your configuration'",
+    "update": "docker-compose pull && docker-compose up -d",
+    "backup": "tar -czf n8n_backup_$(date +%Y%m%d_%H%M%S).tar.gz n8n_data/",
+    "restore": "echo 'Extract your backup file to restore data'"
+  },
+  "keywords": [
+    "n8n",
+    "docker",
+    "workflow",
+    "automation",
+    "deployment",
+    "docker-compose"
+  ],
+  "author": "n8n Docker Setup",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bessuraba/n8n-docker-setup.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bessuraba/n8n-docker-setup/issues"
+  },
+  "homepage": "https://github.com/bessuraba/n8n-docker-setup#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+} 
