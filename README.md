@@ -125,10 +125,10 @@ npm run dev:discover
 
 #### Approach 4: Create New Node
 ```bash
-# Create a new custom node
-npm run dev:create-node myapi
+# Create a new custom node by cloning from repository
+npm run dev:create-node myapi git@github.com:your-org/myapi-n8n-node.git
 
-# This creates the node structure and initializes git repository
+# This clones the repository into nodes/myapi-n8n-node/
 ```
 
 ### 🚀 Production Deployment Workflow
@@ -171,7 +171,7 @@ npm run vps:deploy
 |---------|-------------|
 | `npm run dev:install` | Install nodes for local development |
 | `npm run dev:discover` | Auto-discover and install local nodes |
-| `npm run dev:create-node <name>` | Create a new custom node |
+| `npm run dev:create-node <name> <repo-url>` | Create a new custom node by cloning repository |
 | `npm run dev:publish` | Publish nodes to npm |
 | `npm run dev:deploy` | Deploy to VPS |
 | `npm run docker:install` | Run Docker entrypoint script |

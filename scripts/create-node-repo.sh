@@ -5,234 +5,133 @@
 
 set -e
 
-if [ $# -lt 1 ]; then
-    echo "Usage: $0 <node-name> [github-org]"
-    echo "Example: $0 my-custom-node my-org"
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Logging functions
+log_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+log_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+log_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+log_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+# Function to show help
+show_help() {
+    echo "Usage: $0 <node-name> <repository-url>"
+    echo ""
+    echo "Arguments:"
+    echo "  node-name        Name of the node (e.g., myapi, datavalidator)"
+    echo "  repository-url   Git repository URL to clone"
+    echo ""
+    echo "Examples:"
+    echo "  $0 myapi git@github.com:your-org/myapi-n8n-node.git"
+    echo "  $0 datavalidator https://github.com/your-org/datavalidator-n8n-node.git"
+    echo ""
+    echo "Note: The script will clone the repository into nodes/<node-name>-n8n-node/"
+}
+
+if [ $# -lt 2 ]; then
+    log_error "Node name and repository URL are required"
+    show_help
     exit 1
 fi
 
 NODE_NAME="$1"
-GITHUB_ORG="${2:-}"
+REPO_URL="$2"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-echo "🚀 Creating new custom n8n node: $NODE_NAME"
+# Extract repository name from URL for validation
+REPO_NAME=$(basename "$REPO_URL" .git)
 
-# Create node directory
-NODE_DIR="$PROJECT_ROOT/nodes/$NODE_NAME"
+log_info "🚀 Setting up custom n8n node: $NODE_NAME"
+
+# Create node directory with -n8n-node suffix
+NODE_DIR="$PROJECT_ROOT/nodes/$NODE_NAME-n8n-node"
 if [ -d "$NODE_DIR" ]; then
-    echo "❌ Node directory already exists: $NODE_DIR"
+    log_warning "Node directory already exists: $NODE_DIR"
+    read -p "Do you want to remove it and re-clone? (y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        log_info "Operation cancelled"
+        exit 1
+    fi
+    rm -rf "$NODE_DIR"
+fi
+
+# Clone the repository
+log_info "📥 Cloning repository: $REPO_URL"
+cd "$PROJECT_ROOT/nodes"
+
+if git clone "$REPO_URL" "$NODE_NAME-n8n-node"; then
+    log_success "Repository cloned successfully"
+else
+    log_error "Failed to clone repository"
     exit 1
 fi
 
-mkdir -p "$NODE_DIR"
 cd "$NODE_DIR"
 
-# Initialize git repository
-git init
+# Check if the cloned repository has the expected structure
+if [ ! -f "package.json" ]; then
+    log_warning "Repository doesn't contain package.json"
+    log_info "This might not be a valid n8n node repository"
+fi
 
-# Create package.json
-cat > package.json << EOF
-{
-  "name": "n8n-nodes-$NODE_NAME",
-  "version": "1.0.0",
-  "description": "Custom n8n node for $NODE_NAME",
-  "keywords": [
-    "n8n",
-    "n8n-node",
-    "n8n-custom-node",
-    "$NODE_NAME"
-  ],
-  "license": "MIT",
-  "homepage": "",
-  "author": {
-    "name": "Your Name",
-    "email": "your.email@example.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/${GITHUB_ORG:-your-org}/n8n-nodes-$NODE_NAME.git"
-  },
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc && gulp build:icons",
-    "dev": "tsc --watch",
-    "format": "prettier nodes credentials --write",
-    "lint": "eslint nodes credentials package.json",
-    "lintfix": "eslint nodes credentials package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json"
-  },
-  "files": [
-    "dist"
-  ],
-  "n8n": {
-    "n8nNodesApiVersion": 1,
-    "nodes": [
-      "dist/nodes/$NODE_NAME/$NODE_NAME.node.js"
-    ]
-  },
-  "devDependencies": {
-    "@types/express": "^4.17.6",
-    "@types/request-promise-native": "~1.0.15",
-    "@typescript-eslint/parser": "^5.29.0",
-    "eslint-plugin-n8n-nodes-base": "^1.0.0",
-    "gulp": "^4.0.2",
-    "n8n-core": "^0.125.0",
-    "n8n-workflow": "^0.107.0",
-    "prettier": "^2.7.1",
-    "typescript": "~4.6.4"
-  }
-}
-EOF
+# Check if it's already a git repository
+if [ -d ".git" ]; then
+    log_success "Git repository initialized"
+    
+    # Show repository info
+    log_info "Repository information:"
+    echo "  Remote: $(git remote get-url origin 2>/dev/null || echo 'None')"
+    echo "  Branch: $(git branch --show-current 2>/dev/null || echo 'None')"
+    echo "  Status: $(git status --porcelain | wc -l) changes"
+else
+    log_warning "No git repository found in cloned directory"
+fi
 
-# Create TypeScript configuration
-mkdir -p src
-cat > tsconfig.json << EOF
-{
-  "compilerOptions": {
-    "lib": ["es2019", "es2020.promise", "es2020.bigint", "es2020.string"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "removeComments": true,
-    "sourceMap": true,
-    "target": "es2019",
-    "typeRoots": ["node_modules/@types"]
-  },
-  "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules/**/*", "**/*.spec.ts"]
-}
-EOF
+# Check if the node is properly excluded from main repository
+if git check-ignore "$NODE_DIR" >/dev/null 2>&1; then
+    log_success "Node is properly excluded from main repository"
+else
+    log_warning "Node is not excluded from main repository"
+    log_info "Adding to .gitignore..."
+    
+    # Add to .gitignore
+    echo "nodes/$NODE_NAME-n8n-node/" >> "$PROJECT_ROOT/.gitignore"
+    log_success "Added to .gitignore"
+fi
 
-# Create source directory structure
-mkdir -p "src/nodes/$NODE_NAME"
-mkdir -p "src/credentials"
-
-# Create main node file
-cat > "src/nodes/$NODE_NAME/$NODE_NAME.node.ts" << EOF
-import { IExecuteFunctions } from 'n8n-core';
-import {
-	INodeExecutionData,
-	INodeType,
-	INodeTypeDescription,
-} from 'n8n-workflow';
-
-export class $NODE_NAME implements INodeType {
-	description: INodeTypeDescription = {
-		displayName: '$NODE_NAME',
-		name: '$NODE_NAME',
-		icon: 'file:$NODE_NAME.svg',
-		group: ['transform'],
-		version: 1,
-		description: 'Custom node for $NODE_NAME',
-		defaults: {
-			name: '$NODE_NAME',
-		},
-		inputs: ['main'],
-		outputs: ['main'],
-		properties: [
-			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				options: [
-					{
-						name: 'Example Operation',
-						value: 'example',
-						description: 'Example operation description',
-					},
-				],
-				default: 'example',
-				noDataExpression: true,
-			},
-		],
-	};
-
-	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const items = this.getInputData();
-		const returnData: INodeExecutionData[] = [];
-
-		for (let i = 0; i < items.length; i++) {
-			const operation = this.getNodeParameter('operation', i) as string;
-
-			if (operation === 'example') {
-				// Add your node logic here
-				const newItem: INodeExecutionData = {
-					json: {
-						...items[i].json,
-						processed: true,
-						timestamp: new Date().toISOString(),
-					},
-				};
-				returnData.push(newItem);
-			}
-		}
-
-		return [returnData];
-	}
-}
-EOF
-
-# Create SVG icon placeholder
-cat > "src/nodes/$NODE_NAME/$NODE_NAME.svg" << EOF
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="10"/>
-  <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-  <line x1="9" y1="9" x2="9.01" y2="9"/>
-  <line x1="15" y1="9" x2="15.01" y2="9"/>
-</svg>
-EOF
-
-# Create README
-cat > README.md << EOF
-# $NODE_NAME Node for n8n
-
-This is a custom n8n node for $NODE_NAME.
-
-## Installation
-
-Follow the installation instructions for custom n8n nodes.
-
-## Usage
-
-Describe how to use this node.
-
-## Development
-
-\`\`\`bash
-npm install
-npm run build
-\`\`\`
-
-## License
-
-MIT
-EOF
-
-# Create .gitignore
-cat > .gitignore << EOF
-node_modules/
-dist/
-*.log
-.env
-.DS_Store
-EOF
-
-# Initialize git and make initial commit
-git add .
-git commit -m "Initial commit: $NODE_NAME custom n8n node"
-
-echo "✅ Created custom node: $NODE_NAME"
-echo "📁 Location: $NODE_DIR"
+log_success "✅ Custom node setup complete: $NODE_NAME"
 echo ""
-echo "Next steps:"
+log_info "📁 Location: $NODE_DIR"
+echo ""
+log_info "Next steps:"
 echo "1. cd $NODE_DIR"
 echo "2. npm install"
-echo "3. Implement your node logic in src/nodes/$NODE_NAME/$NODE_NAME.node.ts"
+echo "3. Implement your node logic"
 echo "4. Test your node"
-echo "5. Push to your repository"
-
-if [ -n "$GITHUB_ORG" ]; then
-    echo ""
-    echo "To create GitHub repository:"
-    echo "gh repo create $GITHUB_ORG/n8n-nodes-$NODE_NAME --private --source=$NODE_DIR"
-fi 
+echo "5. Push changes to your repository"
+echo ""
+log_info "To use this node in n8n:"
+echo "1. Add to .env: CUSTOM_NODES=$NODE_NAME"
+echo "2. Start n8n: npm start"
+echo ""
+log_info "Available commands:"
+echo "- npm run dev:discover    # Auto-discover and install nodes"
+echo "- npm run dev:manage-repos list    # List all custom nodes" 

@@ -48,7 +48,7 @@ Each node should follow this structure:
 
 - `npm run dev:install` - Install nodes for local development
 - `npm run dev:discover` - Auto-discover and install local nodes
-- `npm run dev:create-node` - Create a new custom node
+- `npm run dev:create-node <name> <repo-url>` - Create a new custom node by cloning repository
 - `npm run dev:publish` - Publish nodes to npm
 
 ## Current Nodes
