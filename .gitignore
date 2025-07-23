@@ -7,3 +7,22 @@ n8n_data/
 # Ignore OS-specific files
 .DS_Store
 Thumbs.db
+
+# Ignore node-specific files
+nodes/*/node_modules/
+nodes/*/dist/
+nodes/*/.env
+nodes/*/.env.*
+nodes/*/coverage/
+nodes/*/.nyc_output/
+nodes/*/logs/
+nodes/*/*.log
+nodes/*/npm-debug.log*
+nodes/*/yarn-debug.log*
+nodes/*/yarn-error.log*
+
+# Exclude specific custom nodes that have their own repositories
+# Add new custom nodes here as they are created
+nodes/pulseapi/
+# nodes/other-node/
+# nodes/another-node/

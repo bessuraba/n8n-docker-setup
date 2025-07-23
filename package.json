@@ -1,45 +1,42 @@
 {
   "name": "n8n-docker-setup",
   "version": "1.0.0",
-  "description": "Ready-to-deploy Docker setup for n8n workflow automation tool",
+  "description": "Docker setup for n8n with custom nodes support",
   "main": "index.js",
   "scripts": {
     "start": "docker-compose up -d",
     "stop": "docker-compose down",
     "restart": "docker-compose restart",
     "logs": "docker-compose logs -f",
-    "status": "docker-compose ps",
-    "clean": "docker-compose down -v && docker system prune -f",
     "build": "docker-compose build",
-    "deploy": "npm run build && npm run start",
-    "dev": "docker-compose up",
-    "setup": "cp env.example .env && echo 'Please edit .env file with your configuration'",
-    "update": "docker-compose pull && docker-compose up -d",
-    "backup": "tar -czf n8n_backup_$(date +%Y%m%d_%H%M%S).tar.gz n8n_data/",
-    "restore": "echo 'Extract your backup file to restore data'"
+    "clean": "docker-compose down -v && docker system prune -f",
+    "dev:install": "./scripts/install-nodes.sh",
+    "dev:discover": "./scripts/discover-nodes.sh --auto-discover",
+    "dev:create-node": "./scripts/create-node-repo.sh",
+    "dev:manage-repos": "./scripts/manage-node-repos.sh",
+    "dev:publish": "./scripts/publish-nodes.sh",
+    "dev:deploy": "./scripts/deploy-vps.sh",
+    "docker:install": "./scripts/docker-entrypoint.sh"
   },
   "keywords": [
     "n8n",
     "docker",
-    "workflow",
     "automation",
-    "deployment",
-    "docker-compose"
+    "workflow",
+    "custom-nodes"
   ],
-  "author": "n8n Docker Setup",
+  "author": "Your Name",
   "license": "MIT",
+  "devDependencies": {
+    "prettier": "^2.8.8"
+  },
+  "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bessuraba/n8n-docker-setup.git"
+    "url": "git+https://github.com/yourusername/n8n-docker-setup.git"
   },
   "bugs": {
-    "url": "https://github.com/bessuraba/n8n-docker-setup/issues"
+    "url": "https://github.com/yourusername/n8n-docker-setup/issues"
   },
-  "homepage": "https://github.com/bessuraba/n8n-docker-setup#readme",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
-  "devDependencies": {},
-  "dependencies": {}
+  "homepage": "https://github.com/yourusername/n8n-docker-setup#readme"
 } 

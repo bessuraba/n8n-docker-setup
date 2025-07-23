@@ -1,0 +1,44 @@
+{
+  "name": "n8n-custom-nodes",
+  "version": "1.0.0",
+  "description": "Custom n8n nodes for development and deployment",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run build:all",
+    "build:all": "npm run build:nodes",
+    "build:nodes": "for dir in */; do if [ -f \"$dir/package.json\" ]; then echo \"Building $dir\"; cd \"$dir\" && npm run build && cd ..; fi; done",
+    "test": "npm run test:all",
+    "test:all": "npm run test:nodes",
+    "test:nodes": "for dir in */; do if [ -f \"$dir/package.json\" ]; then echo \"Testing $dir\"; cd \"$dir\" && npm test && cd ..; fi; done",
+    "install:all": "npm run install:nodes",
+    "install:nodes": "for dir in */; do if [ -f \"$dir/package.json\" ]; then echo \"Installing $dir\"; cd \"$dir\" && npm install && cd ..; fi; done",
+    "publish:all": "npm run publish:nodes",
+    "publish:nodes": "for dir in */; do if [ -f \"$dir/package.json\" ]; then echo \"Publishing $dir\"; cd \"$dir\" && npm publish && cd ..; fi; done",
+    "version:patch": "npm run version:nodes patch",
+    "version:minor": "npm run version:nodes minor",
+    "version:major": "npm run version:nodes major",
+    "version:nodes": "for dir in */; do if [ -f \"$dir/package.json\" ]; then echo \"Versioning $dir\"; cd \"$dir\" && npm version $1 && cd ..; fi; done",
+    "clean": "npm run clean:nodes",
+    "clean:nodes": "for dir in */; do if [ -f \"$dir/package.json\" ]; then echo \"Cleaning $dir\"; cd \"$dir\" && rm -rf node_modules dist && cd ..; fi; done",
+    "dev:install": "npm run install:all && npm run build:all && ../scripts/install-nodes.sh",
+    "docker:install": "../scripts/docker-entrypoint.sh"
+  },
+  "keywords": [
+    "n8n",
+    "nodes",
+    "custom",
+    "workflow",
+    "automation"
+  ],
+  "author": "n8n Custom Nodes",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+} 

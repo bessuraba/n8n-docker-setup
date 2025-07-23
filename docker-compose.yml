@@ -24,6 +24,10 @@ services:
       - N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL:-}
       - N8N_METRICS=${N8N_METRICS:-false}
       - N8N_TELEMETRY_ENABLED=${N8N_TELEMETRY_ENABLED:-false}
+      
+      # Custom Nodes Configuration
+      - N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom
     volumes:
       - ./n8n_data:/home/node/.n8n
+      - ./nodes:/tmp/nodes:ro
 
