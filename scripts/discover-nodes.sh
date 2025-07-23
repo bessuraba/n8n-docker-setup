@@ -163,6 +163,10 @@ discover_local_nodes() {
     for node_dir in "$base_path"/*/; do
         if [ -d "$node_dir" ] && [ -f "$node_dir/package.json" ]; then
             local node_name=$(basename "$node_dir")
+            # Remove -n8n-node suffix for consistent naming
+            if [[ "$node_name" == *"-n8n-node" ]]; then
+                node_name="${node_name%-n8n-node}"
+            fi
             discovered_nodes+=("$node_name")
         fi
     done
@@ -230,8 +234,15 @@ auto_discover_local() {
     log_info "Found ${#discovered_nodes[@]} local nodes: ${discovered_nodes[*]}"
     
     for node_name in "${discovered_nodes[@]}"; do
+        # Try both naming conventions
         local node_path="$base_path/$node_name"
-        install_local_node "$node_name" "$node_path"
+        local node_path_with_suffix="$base_path/$node_name-n8n-node"
+        
+        if [ -d "$node_path" ]; then
+            install_local_node "$node_name" "$node_path"
+        elif [ -d "$node_path_with_suffix" ]; then
+            install_local_node "$node_name" "$node_path_with_suffix"
+        fi
     done
 }
 

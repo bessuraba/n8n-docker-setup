@@ -21,8 +21,6 @@ nodes/*/npm-debug.log*
 nodes/*/yarn-debug.log*
 nodes/*/yarn-error.log*
 
-# Exclude specific custom nodes that have their own repositories
-# Add new custom nodes here as they are created
-nodes/pulseapi/
-# nodes/other-node/
-# nodes/another-node/
+# Exclude custom nodes that have their own repositories
+# All custom node repositories end with -n8n-node
+nodes/*-n8n-node/

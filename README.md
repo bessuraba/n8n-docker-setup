@@ -76,7 +76,7 @@ n8n-docker-setup/
 │   ├── publish-nodes.sh       # npm publishing script
 │   └── deploy-vps.sh          # VPS deployment script
 ├── nodes/                     # Custom nodes directory
-│   └── pulseapi/             # PulseAPI integration node
+│   └── pulseapi-n8n-node/    # PulseAPI integration node (cloned from GitHub)
 └── n8n_data/                  # n8n data (created on first run)
 ```
 
@@ -314,7 +314,7 @@ n8n-docker-setup/
 │   ├── publish-nodes.sh # npm publishing
 │   └── deploy-vps.sh   # VPS deployment
 └── nodes/              # Custom nodes directory
-    └── pulseapi/       # PulseAPI integration node
+    └── pulseapi-n8n-node/ # PulseAPI integration node (cloned from GitHub)
 ```
 
 ---

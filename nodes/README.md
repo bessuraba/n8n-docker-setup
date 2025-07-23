@@ -8,7 +8,7 @@ This directory contains custom n8n nodes for development and deployment.
 nodes/
 ├── README.md                 # This file
 ├── package.json             # Main package.json for all nodes
-├── pulseapi/                # PulseAPI integration node
+├── pulseapi-n8n-node/       # PulseAPI integration node (cloned from GitHub)
 │   ├── package.json        # Node-specific package.json
 │   ├── src/                # Source code
 │   ├── README.md           # Node documentation

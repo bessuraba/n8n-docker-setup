@@ -128,11 +128,16 @@ else
         
         case "$CUSTOM_NODES_SOURCE" in
             "local")
+                # Try both naming conventions: direct name and -n8n-node suffix
                 local_node_dir="$PROJECT_ROOT/nodes/$node"
+                local_node_dir_with_suffix="$PROJECT_ROOT/nodes/$node-n8n-node"
+                
                 if [ -d "$local_node_dir" ]; then
                     install_local_node "$local_node_dir"
+                elif [ -d "$local_node_dir_with_suffix" ]; then
+                    install_local_node "$local_node_dir_with_suffix"
                 else
-                    echo "⚠️  Local node '$node' not found in $PROJECT_ROOT/nodes/"
+                    echo "⚠️  Local node '$node' not found in $PROJECT_ROOT/nodes/ or $PROJECT_ROOT/nodes/$node-n8n-node/"
                 fi
                 ;;
             "npm")

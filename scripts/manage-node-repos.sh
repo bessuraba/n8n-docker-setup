@@ -57,7 +57,7 @@ show_help() {
 init_node() {
     local node_name="$1"
     local repo_url="$2"
-    local node_dir="$NODES_DIR/$node_name"
+    local node_dir="$NODES_DIR/$node_name-n8n-node"
     
     if [ -z "$node_name" ] || [ -z "$repo_url" ]; then
         log_error "Node name and repository URL are required"
@@ -322,18 +322,18 @@ exclude_node() {
     
     log_info "Excluding $node_name from main repository"
     
-    # Add to .gitignore if not already there
-    if ! grep -q "^nodes/$node_name/$" "$gitignore_file"; then
-        echo "nodes/$node_name/" >> "$gitignore_file"
-        log_success "Added $node_name to .gitignore"
+    # Add to .gitignore if not already there (using -n8n-node suffix)
+    if ! grep -q "^nodes/$node_name-n8n-node/$" "$gitignore_file"; then
+        echo "nodes/$node_name-n8n-node/" >> "$gitignore_file"
+        log_success "Added $node_name-n8n-node to .gitignore"
     else
-        log_info "$node_name already excluded"
+        log_info "$node_name-n8n-node already excluded"
     fi
     
     # Remove from git tracking if tracked
-    if git ls-files "nodes/$node_name/" >/dev/null 2>&1; then
-        git rm -r --cached "nodes/$node_name/" >/dev/null 2>&1 || true
-        log_success "Removed $node_name from git tracking"
+    if git ls-files "nodes/$node_name-n8n-node/" >/dev/null 2>&1; then
+        git rm -r --cached "nodes/$node_name-n8n-node/" >/dev/null 2>&1 || true
+        log_success "Removed $node_name-n8n-node from git tracking"
     fi
 }
 
@@ -344,14 +344,14 @@ include_node() {
     
     log_info "Including $node_name in main repository"
     
-    # Remove from .gitignore
-    sed -i.bak "/^nodes\/$node_name\/$/d" "$gitignore_file"
+    # Remove from .gitignore (using -n8n-node suffix)
+    sed -i.bak "/^nodes\/$node_name-n8n-node\/$/d" "$gitignore_file"
     rm -f "${gitignore_file}.bak"
     
     # Add to git tracking
-    git add "nodes/$node_name/"
+    git add "nodes/$node_name-n8n-node/"
     
-    log_success "Included $node_name in main repository"
+    log_success "Included $node_name-n8n-node in main repository"
 }
 
 # Function to list all custom nodes
@@ -380,11 +380,19 @@ list_nodes() {
             # Check if excluded from main repo
             if grep -q "^nodes/$node_name/$" "$PROJECT_ROOT/.gitignore"; then
                 exclude_status="🚫 Excluded"
+            elif git check-ignore "$node_dir" >/dev/null 2>&1; then
+                exclude_status="🚫 Excluded"
             else
                 exclude_status="📦 Included"
             fi
             
-            echo "  $node_name: $git_status, $exclude_status"
+            # Display node name without -n8n-node suffix for clarity
+            local display_name="$node_name"
+            if [[ "$node_name" == *"-n8n-node" ]]; then
+                display_name="${node_name%-n8n-node}"
+            fi
+            
+            echo "  $display_name: $git_status, $exclude_status"
         fi
     done
 }
