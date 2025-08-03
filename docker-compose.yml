@@ -30,4 +30,5 @@ services:
     volumes:
       - ./n8n_data:/home/node/.n8n
       - ./nodes:/tmp/nodes:ro
+    command: ${N8N_COMMAND:-}
 
