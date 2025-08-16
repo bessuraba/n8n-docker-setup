@@ -4,8 +4,7 @@ services:
   n8n:
     image: n8nio/n8n:1.104.2
     restart: unless-stopped
-    ports:
-      - "5678:5678"
+    network_mode: "host"
     environment:
       # Basic Authentication
       - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
